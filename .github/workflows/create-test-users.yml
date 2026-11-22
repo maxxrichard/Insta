@@ -1,0 +1,49 @@
+name: Create test users
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: Number of test users to create (1-50)
+        required: true
+        type: number
+        default: 5
+      permissions:
+        description: Comma-separated permissions to grant (optional)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency: create-test-users
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Create test users
+        env:
+          META_APP_ID: ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          COUNT: ${{ inputs.count }}
+          PERMISSIONS: ${{ inputs.permissions }}
+        run: |
+          python -m testusers.cli --output test_users.xlsx create \
+            --count "$COUNT" --permissions "$PERMISSIONS"
+      - name: Upload tracker
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-users-${{ github.run_number }}
+          path: test_users.xlsx
+          if-no-files-found: ignore
+          retention-days: 14
