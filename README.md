@@ -46,6 +46,31 @@ sheet with status `deleted`.
 - The tracker contains credentials. `*.xlsx` is git-ignored; keep the repo
   private if you rely on workflow artifacts.
 
+## Instagram posting bot
+
+`igbot` posts a picture to an Instagram account you own, through the official
+content publishing API.
+
+Requirements:
+
+- An Instagram **professional** (Business or Creator) account.
+- A Meta app with the Instagram product, and a long-lived access token for
+  that account with the `instagram_business_content_publish` permission.
+- The picture must be a JPEG at a public HTTPS URL; Instagram downloads it.
+
+```bash
+export IG_USER_ID=... IG_ACCESS_TOKEN=...
+python -m igbot.cli --image-url https://example.com/photo.jpg --caption "Hello"
+```
+
+From GitHub: add the secrets `IG_USER_ID` and `IG_ACCESS_TOKEN`, then run
+Actions → **Post photo to Instagram**. If your token comes from Facebook Login
+rather than Instagram Login, set the variable `IG_API_BASE` to
+`https://graph.facebook.com`.
+
+Long-lived tokens expire after 60 days unless refreshed, and Instagram limits
+API publishing to 100 posts per 24 hours.
+
 ## Tests
 
 ```bash
